@@ -1,3 +1,4 @@
+import os
 import socket
 
 class TCPServer:
@@ -82,7 +83,26 @@ class HTTPServer(TCPServer):
         
     #handling the GET request
     def handle_GET(self, request):
-        return b"vatafu darius"
+        
+        filename = request.uri.strip('/')
+        
+        if os.path.exists(filename):
+            response_line = self.response_line(status_code = 200)
+            
+            headers = self.response_headers()
+            
+            with open(filename, "rb" )as f:
+                response_body = f.read()
+        else:
+            response_line = self.response_line(status_code = 404)
+            
+            headers = self.response_headers()
+            response_body = b"<h1>Not Found</h1>"
+            
+        blank_line = b"\r\n"
+        
+        return b"".join([response_line, headers,blank_line,  response_body])    
+            
         
 class HTTPRequest:
     def __init__(self,data):
@@ -106,7 +126,7 @@ class HTTPRequest:
         
         if len(words) > 1:
             #this is the uri form the request
-            self.uri = words[1]
+            self.uri = words[1].decode()
             
         if len(words) > 2:
             #this is the http version from the request
