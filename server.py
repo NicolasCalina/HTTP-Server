@@ -1,5 +1,6 @@
 import os
 import socket
+import mimetypes
 
 class TCPServer:
     def __init__(self, host = "127.0.0.1", port = 6969):
@@ -89,7 +90,11 @@ class HTTPServer(TCPServer):
         if os.path.exists(filename):
             response_line = self.response_line(status_code = 200)
             
-            headers = self.response_headers()
+            content_type = mimetypes.guess_type(filename)[0] or "text/html"
+            
+            extra_headers = {"Content-Type" : content_type}
+            
+            headers = self.response_headers(extra_headers)
             
             with open(filename, "rb" )as f:
                 response_body = f.read()
